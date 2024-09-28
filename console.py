@@ -16,7 +16,7 @@ class FunsoleCmd(Cmd):
             self.intro = ('Welcome to the Funsole console! Type '
                           '"help" or "?" for a list of commands. Type '
                           '"exit" or "quit" to exit.')
-        self.prompt = '(hbnb) \033[7m'  # reverses background & foreground
+        self.prompt = '\033[1;34m\033[5m>_\033[0m \033[7m'  # reverses background & foreground
 
     def precmd(self, line):
         """
