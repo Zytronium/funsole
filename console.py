@@ -50,12 +50,12 @@ class FunsoleCmd(Cmd):
 
     @staticmethod
     def do_exit(self):
-        "Exits the console"
+        """Exits the console"""
         return True
 
     @staticmethod
     def do_quit(self):
-        "Exits the console"
+        """Exits the console"""
         return True
 
     @staticmethod
