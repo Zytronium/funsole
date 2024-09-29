@@ -11,6 +11,7 @@ from colors import *
 
 
 class FunsoleCmd(Cmd):
+    player = vlc.MediaPlayer(getcwd() + '/res/SCANNER WARNING.m4a')
     def __init__(self):
         super().__init__()
         if isatty(sys.stdin.isatty()):  # only sets intro in interactive
@@ -100,11 +101,9 @@ Usage: selfdestruct <number>
         # system("systemctl reboot")
         return True
 
-    @staticmethod
-    def do_battleship(self):
+    def do_battleship(self, _):
         """spawns a drone battleship"""
-        player = vlc.MediaPlayer(getcwd() + '/res/SCANNER WARNING.m4a')
-        player.play()
+        self.player.play()
         sleep(6.75)
         set_color('blinking')
         set_color('red')
@@ -113,7 +112,7 @@ Usage: selfdestruct <number>
         print("SCANNER WARNING")
         reset_color()
         print('A high-energy signature is closing on your position.')
-        sleep(12)
+        sleep(11.9)
 
     @staticmethod
     def do_rainbow(self):
