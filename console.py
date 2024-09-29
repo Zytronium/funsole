@@ -2,10 +2,11 @@
 import sys
 import webbrowser
 from cmd import Cmd
-from os import isatty
+from os import isatty, getcwd
+from os import system
 from random import random
 from time import sleep
-
+import vlc
 from colors import *
 
 
@@ -94,10 +95,25 @@ Usage: selfdestruct <number>
         sleep(1)
         reset_color()
         set_color('yellow')
-        # set_color('reverse')
         print("The console has been obliterated. Goodbye.")
         reset_color()
+        # system("systemctl reboot")
         return True
+
+    @staticmethod
+    def do_battleship(self):
+        """spawns a drone battleship"""
+        player = vlc.MediaPlayer(getcwd() + '/res/SCANNER WARNING.m4a')
+        player.play()
+        sleep(6.75)
+        set_color('blinking')
+        set_color('red')
+        set_color('bold')
+        set_color('reverse')
+        print("SCANNER WARNING")
+        reset_color()
+        print('A high-energy signature is closing on your position.')
+        sleep(12)
 
     @staticmethod
     def do_rainbow(self):
