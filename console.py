@@ -1,17 +1,37 @@
 #!/bin/python3
 import sys
+from os import isatty
+from sys import argv
+
+from models import setting_storage
+
+try:
+    import vlc
+    sound = True
+except ImportError:
+    argc = len(argv)
+    if (not (argc > 1 and (argv[1] == '-i' or argv[1] == '--ignore-warnings'))
+        and isatty(sys.stdin.isatty()) and setting_storage.all()['show_warnings']):
+        print("Could not import vlc. Please install package 'vlc' "
+              "to hear audio. 1 command uses sound.")
+        print("One possible command to install vlc would be this command:")
+        print("pip install vlc")
+        print("or, if that doesn't work, try:")
+        print("pip install python-vlc")
+        print("The console will continue without sound. To run without this "
+              "message, do './console.py -i' or './console.py --ignore-warnings'"
+              " or, in this console, do 'settings show_warnings false' to "
+              "never show this message again.\n")
+    sound = False
+import os
 import webbrowser
 from cmd import Cmd
-from os import isatty, getcwd
-from os import system
 from random import random
 from time import sleep
-import vlc
 from colors import *
 
 
 class FunsoleCmd(Cmd):
-    player = vlc.MediaPlayer(getcwd() + '/res/SCANNER WARNING.m4a')
     def __init__(self):
         super().__init__()
         if isatty(sys.stdin.isatty()):  # only sets intro in interactive
@@ -79,6 +99,8 @@ Usage: selfdestruct <number>
             print("Please specify a valid number, or leave blank.")
             return
 
+        FunsoleCmd.play_sound('alarm', True )
+
         set_color('red')
         set_color('bold')
         set_color('reverse')
@@ -101,9 +123,10 @@ Usage: selfdestruct <number>
         # system("systemctl reboot")
         return True
 
-    def do_battleship(self, _):
+    @staticmethod
+    def do_battleship(_):
         """spawns a drone battleship"""
-        self.player.play()
+        FunsoleCmd.play_sound('scanner warning')
         sleep(6.75)
         set_color('blinking')
         set_color('red')
@@ -159,6 +182,104 @@ Usage: selfdestruct <number>
             "1234", "123", "")):
             print("Such a bad password that you're being kicked out. Bye!")
             return True
+
+    # ====================== console settings ======================
+
+    @staticmethod
+    def do_settings(argstr):
+        """
+Change console settings.
+Usages:
+settings <setting> <value> | change a setting's value
+settings <setting> | see a setting's current value
+settings | list all settings and their current values
+        """
+        setting_storage.reload()
+        args = FunsoleCmd.parse_args(argstr, 2)
+
+        # for usage: 'settings': display all settings
+        if args[0] == '':
+            for key, value in setting_storage.all().items():
+                print(f"{key}: {value}")
+        # for usage: 'settings <setting>': display <setting>'s value
+        elif args[1] == '':
+            setting = args[0]
+            if setting in setting_storage.all():
+                print(f"{setting}: {setting_storage.all()[setting]}")
+            else:
+                print(f"** setting '{setting}' does not exist **")
+        # for usage: 'settings <setting> <value>': update given settings value
+        elif args[1] != '':
+            setting = args[0]
+            value = args[1]
+
+            # convert value to boolean
+            if value.lower() == "true":
+                value = True
+            elif value.lower() == "false":
+                value = False
+            elif value != '':
+                print("** please enter true or false **")
+                return
+
+            setting_storage.new(setting, value)
+            setting_storage.save()
+            print(f"Setting '{setting}' updated to {value}.")
+
+    @staticmethod
+    def play_sound(sound: str, repeat: bool = False):
+        """
+        plays an audio file.
+        :param sound: must be one of 4 specific non-case-sensitive strings
+        to indicate which of the 2 sounds to play
+        :param repeat: boolean to indicate if the sound should loop infinitely.
+        default value is false if not given.
+        """
+        if not sound or  not setting_storage.all()['sound']:
+            return
+        sep = os.sep
+        player = vlc.Instance()
+        media_list = player.media_list_new()
+        media_player = player.media_list_player_new()
+        match sound.lower():
+            case "battleship" | "scanner warning":
+                alarm = player.media_new(
+                    os.getcwd() + f'{sep}assets{sep}SCANNER WARNING.m4a')
+            case "alarm" | "self destruct":
+                alarm = player.media_new(
+                    os.getcwd() + f'{sep}assets{sep}alarm.mp3')
+            case _:
+                raise ValueError(
+                    "valid values for the `sound` param for play_sound() "
+                    "are: 'battleship' or 'scanner warning' for "
+                    "SCANNER WARNING.m4a; or 'alarm' or 'self destruct' "
+                    "for alarm.mp3")
+
+        media_list.add_media(alarm)
+        media_player.set_media_list(media_list)
+
+        if repeat:
+            media_player.get_media_player().event_manager().event_attach(
+                vlc.EventType.MediaPlayerEndReached,
+                lambda event: FunsoleCmd.play_sound(sound, repeat)
+            )
+        media_player.play()
+
+    @staticmethod
+    def parse_args(argstr, num_args=3):
+        """
+        parse args by converting a string of args (argstr) into individual args
+        :param argstr: string of arguments, separated by spaces.
+        :param num_args: number of args to parse. 3 by default if left empty
+        :return: a list of args
+        """
+        args = argstr.split(' ')
+        if len(args) < num_args:
+            add_args = num_args - len(args)
+            for i in range(add_args):
+                args.append('')
+        return args
+
 
 if __name__ == '__main__':
     FunsoleCmd().cmdloop()
