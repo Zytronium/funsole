@@ -13,7 +13,7 @@ except ImportError:
     if (not (argc > 1 and (argv[1] == '-i' or argv[1] == '--ignore-warnings'))
         and isatty(sys.stdin.isatty()) and setting_storage.all()['show_warnings']):
         print("Could not import vlc. Please install package 'vlc' "
-              "to hear audio. 1 command uses sound.")
+              "to hear audio. 2 commands use sound.")
         print("One possible command to install vlc would be this command:")
         print("pip install vlc")
         print("or, if that doesn't work, try:")
@@ -60,8 +60,10 @@ class FunsoleCmd(Cmd):
                 return True
             case "easter egg":
                 print("You found the easter egg!")
-            case "line21", "line 21":
-                print("You've just ran line 21 of this program's script!")
+            case "line63":
+                print("You've just ran line 63 of this program's script!")
+            case "line21":
+                print("This easter egg is now located on line 63.")
             case _:
                 super().default(line)
 
