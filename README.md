@@ -4,11 +4,13 @@ A playful, interactive command-line console packed with fun commands,
 colorful effects, sound effects, and easter eggs. Built for fun, experimentation,
 and as a showcase of creative Python CLI programming.
 
+Note: WIP readme
+
 ---
 
 ## Screenshots
 
-(Add screenshots or GIFs here showing the console in action!)
+(todo)
 
 ---
 
